@@ -12,7 +12,9 @@ const tempDirectories: string[] = [];
 function createProject(): string {
   const cwd = mkdtempSync(path.join(tmpdir(), 'octokern-cli-'));
   tempDirectories.push(cwd);
-  writeFileSync(path.join(cwd, 'app.def.mjs'), `
+  writeFileSync(
+    path.join(cwd, 'app.def.mjs'),
+    `
     const definition = {
       [Symbol.for('fast-config.definition')]: true,
       name: 'app',
@@ -32,20 +34,34 @@ function createProject(): string {
       },
     };
     export default definition;
-  `);
+  `,
+  );
   return cwd;
 }
 
 afterEach(() => {
   process.chdir(originalCwd);
   process.exitCode = originalExitCode;
-  for (const directory of tempDirectories.splice(0)) rmSync(directory, { recursive: true, force: true });
+  for (const directory of tempDirectories.splice(0))
+    rmSync(directory, { recursive: true, force: true });
   vi.restoreAllMocks();
 });
 
 describe('CLI', () => {
   it('parses value, boolean, repeatable and separator arguments', () => {
-    const parsed = parseArgs(['check', '-c', 'app.def.ts', '-e', '.env', '--env-file=.env.local', '--expand', '--no-process-env', '--', 'node', 'server.js']);
+    const parsed = parseArgs([
+      'check',
+      '-c',
+      'app.def.ts',
+      '-e',
+      '.env',
+      '--env-file=.env.local',
+      '--expand',
+      '--no-process-env',
+      '--',
+      'node',
+      'server.js',
+    ]);
     expect(parsed.command).toBe('check');
     expect(parsed.options.config).toBe('app.def.ts');
     expect(parsed.options['env-file']).toEqual(['.env', '.env.local']);
@@ -85,9 +101,12 @@ describe('CLI', () => {
     process.chdir(cwd);
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     await runCli(['docs', '--stdout']);
-    expect(log.mock.calls.flat().join('\n')).toContain('| Название | Переменная | Обязательна | Тип |');
+    expect(log.mock.calls.flat().join('\n')).toContain('| Name | Environment | Required | Type |');
 
-    writeFileSync(path.join(cwd, 'README.md'), '# App\n\n<!-- fastconfig:start -->\n<!-- fastconfig:end -->\n');
+    writeFileSync(
+      path.join(cwd, 'README.md'),
+      '# App\n\n<!-- fastconfig:start -->\n<!-- fastconfig:end -->\n',
+    );
     await runCli(['docs', '--inject', 'README.md']);
     expect(readFileSync(path.join(cwd, 'README.md'), 'utf8')).toContain('Service API key');
 

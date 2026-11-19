@@ -9,16 +9,20 @@ function escapeCell(value: unknown): string {
   return formatValue(value).replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>');
 }
 
-export function renderConfigDocs(fields: ReturnType<Awaited<ReturnType<typeof loadDefinitions>>[number]['describeFields']>): string {
+export function renderConfigDocs(
+  fields: ReturnType<Awaited<ReturnType<typeof loadDefinitions>>[number]['describeFields']>,
+): string {
   const lines = [
-    '| Название | Переменная | Обязательна | Тип | По умолчанию | Секрет | Описание |',
+    '| Name | Environment | Required | Type | Default | Secret | Description |',
     '| --- | --- | --- | --- | --- | --- | --- |',
   ];
   for (const field of fields) {
     const type = field.enumValues?.length
       ? `enum: ${field.enumValues.map(formatValue).join(', ')}`
       : field.type;
-    lines.push(`| ${escapeCell(field.name)} | \`${escapeCell(field.key)}\` | ${field.required ? 'Да' : 'Нет'} | ${escapeCell(type)} | ${escapeCell(field.defaultValue)} | ${field.secret ? 'Да' : 'Нет'} | ${escapeCell(field.description)} |`);
+    lines.push(
+      `| ${escapeCell(field.name)} | \`${escapeCell(field.key)}\` | ${field.required ? 'Yes' : 'No'} | ${escapeCell(type)} | ${escapeCell(field.defaultValue)} | ${field.secret ? 'Yes' : 'No'} | ${escapeCell(field.description)} |`,
+    );
   }
   return `${lines.join('\n')}\n`;
 }
@@ -29,7 +33,10 @@ export async function docsCommand(context: CommandContext): Promise<void> {
   const markdown = renderConfigDocs(fields);
   const injectFile = getOptionString(context.args.options, 'inject');
   if (injectFile) {
-    const filePath = getOutPath({ ...context.args, options: { ...context.args.options, out: injectFile } }, injectFile);
+    const filePath = getOutPath(
+      { ...context.args, options: { ...context.args.options, out: injectFile } },
+      injectFile,
+    );
     if (!existsSync(filePath)) throw new Error(`Cannot inject docs: file not found: ${filePath}`);
     const original = readFileSync(filePath, 'utf8');
     const start = '<!-- fastconfig:start -->';
