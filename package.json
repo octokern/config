@@ -1,7 +1,7 @@
 {
   "name": "@octokern/config",
   "description": "Zero-dependency, type-safe environment configuration for Node.js and NestJS with a schema validator and CLI.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "keywords": [
     "nestjs",
