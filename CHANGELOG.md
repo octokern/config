@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.0.1
+
+### Patch Changes
+
+- b3fa5f2: Replace Russian CLI messages and generated documentation text with English.
+
 ## 1.0.0 — 2026-11-18
 
 First stable release of `@octokern/config`.
