@@ -1,0 +1,11 @@
+[
+  { "name": "bug", "color": "d73a4a", "description": "Something is not working" },
+  { "name": "enhancement", "color": "a2eeef", "description": "New feature or improvement" },
+  { "name": "documentation", "color": "0075ca", "description": "Documentation updates" },
+  { "name": "question", "color": "d876e3", "description": "Usage question" },
+  { "name": "security", "color": "b60205", "description": "Security-related work; never use for public vulnerability reports" },
+  { "name": "triage", "color": "ededed", "description": "Needs maintainer triage" },
+  { "name": "good first issue", "color": "7057ff", "description": "Suitable for first-time contributors" },
+  { "name": "breaking change", "color": "b60205", "description": "Changes public API or compatibility" },
+  { "name": "ideas", "color": "c2e0c6", "description": "Community proposal for discussion" }
+]

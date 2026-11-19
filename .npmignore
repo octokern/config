@@ -1,0 +1,13 @@
+src/
+test/
+scripts/
+
+*.tsbuildinfo
+coverage/
+.vitest/
+.cache/
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

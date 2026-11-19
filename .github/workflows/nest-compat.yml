@@ -1,0 +1,67 @@
+name: NestJS compatibility
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  nest:
+    name: NestJS ${{ matrix.nest-major }} / Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        nest-major: [10, 11, 12]
+        node-version: [22.x, 24.x, 26.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+          package-manager-cache: false
+
+      - name: Install locked development dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install target NestJS major
+        env:
+          NEST_MAJOR: ${{ matrix.nest-major }}
+        run: >-
+          pnpm add --save-dev
+          "@nestjs/common@${NEST_MAJOR}"
+          "@nestjs/core@${NEST_MAJOR}"
+          "@nestjs/testing@${NEST_MAJOR}"
+
+      - name: Type check against target NestJS types
+        run: pnpm typecheck
+
+      - name: Run NestJS and package test suites
+        run: pnpm test
+
+      - name: Build ESM and CommonJS
+        run: pnpm build
+
+      - name: Smoke test both root module formats
+        run: |
+          node --input-type=module -e "import('./dist/esm/index.js').then((m) => { if (typeof m.FastConfigModule !== 'function') process.exit(1); })"
+          node -e "const m = require('./dist/cjs/index.js'); if (typeof m.FastConfigModule !== 'function') process.exit(1)"

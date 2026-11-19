@@ -1,0 +1,133 @@
+{
+  "name": "@octokern/config",
+  "description": "Zero-dependency, type-safe environment configuration for Node.js and NestJS with a schema validator and CLI.",
+  "version": "1.0.0",
+  "type": "module",
+  "keywords": [
+    "nestjs",
+    "nestjs-config",
+    "config",
+    "typed-config",
+    "environment",
+    "env",
+    "dotenv",
+    "validation",
+    "zod",
+    "standard-schema",
+    "cli",
+    "zero-dependency",
+    "type-safe",
+    "fail-fast"
+  ],
+  "author": {
+    "name": "Ivan H.",
+    "email": "ivan.hrabovets@outlook.com"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/octokern/config#readme",
+  "bugs": {
+    "url": "https://github.com/octokern/config/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/octokern/config.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./core": {
+      "types": "./dist/esm/core-entry.d.ts",
+      "import": "./dist/esm/core-entry.js",
+      "require": "./dist/cjs/core-entry.js"
+    }
+  },
+  "bin": {
+    "config": "./bin/octokernconfig.mjs",
+    "fastconfig": "./bin/fastconfig.mjs"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.mjs\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "pnpm sync:version && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/postbuild.mjs",
+    "prepublishOnly": "pnpm run typecheck && pnpm test && pnpm run build && pnpm run pack:check",
+    "prepare": "node scripts/prepare.mjs",
+    "changeset": "changeset",
+    "version-packages": "changeset version && pnpm sync:version",
+    "release": "pnpm run build && changeset publish",
+    "sync:version": "node scripts/sync-version.mjs",
+    "pack:check": "npm pack --dry-run --ignore-scripts"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0 || ^12.0.0",
+    "reflect-metadata": "^0.1.12 || ^0.2.0",
+    "rxjs": "^7.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    },
+    "reflect-metadata": {
+      "optional": true
+    },
+    "rxjs": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "@eslint/js": "^10.0.1",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@types/node": "^22.13.0",
+    "eslint": "^10.15.0",
+    "eslint-config-prettier": "^10.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.1",
+    "prettier": "^3.5.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^3.0.0"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "test/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "scripts/**/*.mjs": [
+      "prettier --write"
+    ]
+  }
+}

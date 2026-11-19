@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.x, 24.x, 26.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build ESM and CommonJS
+        run: pnpm build
+
+      - name: Validate npm package contents
+        run: pnpm pack:check
+
+      - name: Smoke test CLI and Nest-free core entry points
+        run: |
+          node bin/octokernconfig.mjs --version
+          node bin/octokernconfig.mjs --help
+          node --input-type=module -e "import('./dist/esm/core-entry.js').then((m) => { if (typeof m.defineEnvConfig !== 'function') process.exit(1); })"
+          node -e "const m = require('./dist/cjs/core-entry.js'); if (typeof m.defineEnvConfig !== 'function') process.exit(1)"
+
+      - name: Verify packed consumer install (ESM and CommonJS core)
+        shell: bash
+        run: |
+          set -euo pipefail
+          PACK_DIR="$RUNNER_TEMP/octokern-pack"
+          CONSUMER_DIR="$RUNNER_TEMP/octokern-consumer"
+          mkdir -p "$PACK_DIR" "$CONSUMER_DIR"
+          npm pack --ignore-scripts --pack-destination "$PACK_DIR"
+          cd "$CONSUMER_DIR"
+          npm init -y >/dev/null
+          npm install --ignore-scripts "$PACK_DIR"/*.tgz
+          node --input-type=module -e "import('@octokern/config/core').then((m) => { if (typeof m.defineEnvConfig !== 'function') process.exit(1); })"
+          node -e "const m = require('@octokern/config/core'); if (typeof m.defineEnvConfig !== 'function') process.exit(1)"
